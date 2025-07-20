@@ -42,7 +42,7 @@ void TextureManager::drawImage(const std::string &id, int imageLocationX, int im
 
 void TextureManager::cleanImage()
 {
-    for (auto iter : m_textureMap)
+    for (const auto& iter : m_textureMap)
     {
         SDL_DestroyTexture(iter.second);
     }

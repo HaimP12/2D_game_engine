@@ -3,6 +3,7 @@
 //
 
 #include "gameApp.h"
+#include "TextureManager.h"
 
 gameApp::gameApp(const std::string &gameTitle, const uint32_t u32WindowHeight, const uint32_t u32WindowWidth,
                  const uint32_t u32gameFPS) :
@@ -24,9 +25,12 @@ gameApp::~gameApp()
 
 bool gameApp::Init()
 {
-    int res = 0;
-    res = SDL_Init(SDL_INIT_VIDEO);
-    if (res == 0)
+    bool res = false;
+    res = (0 == SDL_Init(SDL_INIT_VIDEO));
+
+    res = res && (IMG_INIT_JPG == IMG_Init(IMG_INIT_JPG));
+
+    if (res)
     {
         m_pSDLWindow = SDL_CreateWindow(m_sGameTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                          m_u32WindowWidth, m_u32WindowHeight, SDL_WINDOW_SHOWN);
@@ -34,7 +38,9 @@ bool gameApp::Init()
         m_pRender = SDL_CreateRenderer(m_pSDLWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     }
 
-    if (m_pSDLWindow && m_pRender)
+    res = res && TextureManager::getInatnce().loadImage("the one ring", "../images/one_ring.jpeg", m_pRender);
+
+    if (res && m_pSDLWindow && m_pRender)
     {
         m_bIsRunning = true;
     }
@@ -44,6 +50,8 @@ bool gameApp::Init()
 
 void gameApp::Shutdown()
 {
+    TextureManager::getInatnce().cleanImage();
+
     if (m_pRender)
     {
         SDL_DestroyRenderer(m_pRender);
@@ -102,5 +110,7 @@ void gameApp::Render()
     SDL_SetRenderDrawColor(m_pRender, 20, 20, 20, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(m_pRender);
 
+    TextureManager::getInatnce().drawImage("the one ring", 120, 200,
+                                           256, 256, m_pRender);
     SDL_RenderPresent(m_pRender);
 }
