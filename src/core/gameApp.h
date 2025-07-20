@@ -7,6 +7,7 @@
 
 #include <SDL.h>
 #include <string>
+#include "InputManager.h"
 
 class gameApp
 {
@@ -44,6 +45,11 @@ private:
 
     SDL_Window* m_pSDLWindow;
     SDL_Renderer* m_pRender;
+
+    InputManager m_inputManager;
+
+    int32_t m_n32ImageXAxisLocation;
+    int32_t m_n32ImageYAxisLocation;
 };
 
 

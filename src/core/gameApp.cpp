@@ -13,7 +13,10 @@ gameApp::gameApp(const std::string &gameTitle, const uint32_t u32WindowHeight, c
                  m_u32GameFPS(u32gameFPS),
                  m_bIsRunning(false),
                  m_pSDLWindow(nullptr),
-                 m_pRender(nullptr)
+                 m_pRender(nullptr),
+                 m_inputManager(),
+                 m_n32ImageYAxisLocation(100),
+                 m_n32ImageXAxisLocation(100)
 {
 
 }
@@ -90,6 +93,29 @@ void gameApp::Run()
 
 void gameApp::Update(float deltaTime)
 {
+    const int32_t PixelsPerSecond = 200;
+
+    auto amountOfMovement = (int32_t)(PixelsPerSecond * deltaTime);
+
+    if (m_inputManager.IsKeyPressed(SDL_SCANCODE_W) || m_inputManager.IsKeyPressed(SDL_SCANCODE_UP))
+    {
+        m_n32ImageYAxisLocation -= amountOfMovement;
+    }
+
+    if (m_inputManager.IsKeyPressed(SDL_SCANCODE_S) || m_inputManager.IsKeyPressed(SDL_SCANCODE_DOWN))
+    {
+        m_n32ImageYAxisLocation += amountOfMovement;
+    }
+
+    if (m_inputManager.IsKeyPressed(SDL_SCANCODE_A) || m_inputManager.IsKeyPressed(SDL_SCANCODE_LEFT))
+    {
+        m_n32ImageXAxisLocation -= amountOfMovement;
+    }
+
+    if (m_inputManager.IsKeyPressed(SDL_SCANCODE_D) || m_inputManager.IsKeyPressed(SDL_SCANCODE_RIGHT))
+    {
+        m_n32ImageXAxisLocation += amountOfMovement;
+    }
 
 }
 
@@ -103,6 +129,9 @@ void gameApp::HandleEvents()
             m_bIsRunning = false;
         }
     }
+
+    /// check if there is input from the keyboard
+    m_inputManager.Update();
 }
 
 void gameApp::Render()
@@ -110,7 +139,8 @@ void gameApp::Render()
     SDL_SetRenderDrawColor(m_pRender, 20, 20, 20, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(m_pRender);
 
-    TextureManager::getInatnce().drawImage("the one ring", 120, 200,
+    TextureManager::getInatnce().drawImage("the one ring",
+                                           m_n32ImageXAxisLocation, m_n32ImageYAxisLocation,
                                            256, 256, m_pRender);
     SDL_RenderPresent(m_pRender);
 }

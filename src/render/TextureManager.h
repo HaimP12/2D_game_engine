@@ -22,7 +22,7 @@ public:
     /// \param imagePath the path to the image
     /// \param pRenderer pointer to renderer object
     /// \return true for success, otherwise false
-    bool loadImage(const std::string& id, const std::string& imagePath, SDL_Renderer* pRenderer);
+    [[nodiscard]] bool loadImage(const std::string& id, const std::string& imagePath, SDL_Renderer* pRenderer);
     /// draw to image on the screen
     /// \param id the name of the image
     /// \param imageLocationX the start of the image on the X axis
