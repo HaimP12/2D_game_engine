@@ -39,7 +39,7 @@ bool gameApp::Init()
         m_bIsRunning = true;
     }
 
-    return (0 == m_bIsRunning);
+    return m_bIsRunning;
 }
 
 void gameApp::Shutdown()
