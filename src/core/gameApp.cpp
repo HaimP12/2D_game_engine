@@ -1,0 +1,106 @@
+//
+// Created by haimash on 7/20/25.
+//
+
+#include "gameApp.h"
+
+gameApp::gameApp(const std::string &gameTitle, const uint32_t u32WindowHeight, const uint32_t u32WindowWidth,
+                 const uint32_t u32gameFPS) :
+                 m_sGameTitle(gameTitle),
+                 m_u32WindowHeight(u32WindowHeight),
+                 m_u32WindowWidth(u32WindowWidth),
+                 m_u32GameFPS(u32gameFPS),
+                 m_bIsRunning(false),
+                 m_pSDLWindow(nullptr),
+                 m_pRender(nullptr)
+{
+
+}
+
+gameApp::~gameApp()
+{
+    Shutdown();
+}
+
+bool gameApp::Init()
+{
+    int res = 0;
+    res = SDL_Init(SDL_INIT_VIDEO);
+    if (res == 0)
+    {
+        m_pSDLWindow = SDL_CreateWindow(m_sGameTitle.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                         m_u32WindowWidth, m_u32WindowHeight, SDL_WINDOW_SHOWN);
+
+        m_pRender = SDL_CreateRenderer(m_pSDLWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    }
+
+    if (m_pSDLWindow && m_pRender)
+    {
+        m_bIsRunning = true;
+    }
+
+    return (0 == m_bIsRunning);
+}
+
+void gameApp::Shutdown()
+{
+    if (m_pRender)
+    {
+        SDL_DestroyRenderer(m_pRender);
+    }
+
+    if(m_pSDLWindow)
+    {
+        SDL_DestroyWindow(m_pSDLWindow);
+    }
+
+    SDL_Quit();
+}
+
+void gameApp::Run()
+{
+    const uint32_t frameDelay = 1000 / m_u32GameFPS;
+
+    uint32_t frameStart;
+    uint32_t frameTime;
+
+    while (m_bIsRunning)
+    {
+        frameStart = SDL_GetTicks();
+
+        HandleEvents();
+        Update((1.0f / m_u32GameFPS));
+        Render();
+
+        frameTime = SDL_GetTicks() - frameStart;
+        if (frameDelay > frameTime)
+        {
+            SDL_Delay(frameDelay - frameTime);
+        }
+    }
+}
+
+void gameApp::Update(float deltaTime)
+{
+
+}
+
+void gameApp::HandleEvents()
+{
+    SDL_Event event;
+    while (SDL_PollEvent(&event))
+    {
+        if (event.type == SDL_QUIT)
+        {
+            m_bIsRunning = false;
+        }
+    }
+}
+
+void gameApp::Render()
+{
+    SDL_SetRenderDrawColor(m_pRender, 20, 20, 20, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(m_pRender);
+
+    SDL_RenderPresent(m_pRender);
+}
