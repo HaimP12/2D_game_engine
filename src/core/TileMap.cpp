@@ -124,11 +124,6 @@ void TileMap::Render(SDL_Renderer *pRenderer)
             SDL_Rect dstRect = {dstX, dstY, m_n32TileWidth, m_n32TileHeight};
 
             TextureManager::getInstance().drawImage(m_textureID, srcRect, dstRect, pRenderer);
-
-            std::cout << "Camera: (" <<  m_camera.xScroll << "," << m_camera.yScroll << ")\n";
-
-            std::cout << "Tile " << tileIndex << " at screen (" << dstX << "," << dstY << ") "
-                      << "from map (" << mapCol << "," << mapRow << ") src: (" << srcX << "," << srcY << ")\n";
         }
     }
 }
