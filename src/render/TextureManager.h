@@ -15,7 +15,7 @@ class TextureManager
 public:
     /// get instance of the texture manager
     /// \return reference to the texture manager
-    static TextureManager& getInatnce();
+    static TextureManager& getInstance();
 
     /// laod image from file
     /// \param id the name of the image
@@ -23,18 +23,20 @@ public:
     /// \param pRenderer pointer to renderer object
     /// \return true for success, otherwise false
     [[nodiscard]] bool loadImage(const std::string& id, const std::string& imagePath, SDL_Renderer* pRenderer);
+
     /// draw to image on the screen
     /// \param id the name of the image
-    /// \param imageLocationX the start of the image on the X axis
-    /// \param imageLocationY the start of the image on the y axis
-    /// \param width the width of the image on the window
-    /// \param height the height of the image on the window
+    /// \param srcRect what part of the texture to draw
+    /// \param destRect where and at what size to draw
     /// \param pRenderer pointer to renderer object
-    void drawImage(const std::string& id, int imageLocationX, int imageLocationY, int width,
-                   int height,SDL_Renderer* pRenderer);
+    void drawImage(const std::string& id, const SDL_Rect& srcRect,
+                   const SDL_Rect& destRect,
+                   SDL_Renderer* pRenderer);
 
     /// clean the image from the window
     void cleanImage();
+
+    SDL_Texture* getTexture(const std::string& id) const;
 
 private:
     TextureManager() = default;

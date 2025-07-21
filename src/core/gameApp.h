@@ -8,6 +8,7 @@
 #include <SDL.h>
 #include <string>
 #include "InputManager.h"
+#include "TileMap.h"
 
 class gameApp
 {
@@ -47,6 +48,8 @@ private:
     SDL_Renderer* m_pRender;
 
     InputManager m_inputManager;
+
+    TileMap* m_tileMap;
 
     int32_t m_n32ImageXAxisLocation;
     int32_t m_n32ImageYAxisLocation;

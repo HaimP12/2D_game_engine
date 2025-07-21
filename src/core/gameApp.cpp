@@ -2,6 +2,7 @@
 // Created by haimash on 7/20/25.
 //
 
+#include <iostream>
 #include "gameApp.h"
 #include "TextureManager.h"
 
@@ -15,6 +16,7 @@ gameApp::gameApp(const std::string &gameTitle, const uint32_t u32WindowHeight, c
                  m_pSDLWindow(nullptr),
                  m_pRender(nullptr),
                  m_inputManager(),
+                 m_tileMap(nullptr),
                  m_n32ImageYAxisLocation(100),
                  m_n32ImageXAxisLocation(100)
 {
@@ -31,7 +33,7 @@ bool gameApp::Init()
     bool res = false;
     res = (0 == SDL_Init(SDL_INIT_VIDEO));
 
-    res = res && (IMG_INIT_JPG == IMG_Init(IMG_INIT_JPG));
+    res = res && ((IMG_INIT_JPG | IMG_INIT_PNG) == IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG));
 
     if (res)
     {
@@ -41,7 +43,21 @@ bool gameApp::Init()
         m_pRender = SDL_CreateRenderer(m_pSDLWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     }
 
-    res = res && TextureManager::getInatnce().loadImage("the one ring", "../images/one_ring.jpeg", m_pRender);
+    res = res && TextureManager::getInstance().loadImage("tileset", "../images/themed_tileset.png", m_pRender);
+
+    SDL_Texture* texture = TextureManager::getInstance().getTexture("tileset");
+    int textureWidth = 0, textureHeight = 0;
+    if (texture)
+    {
+        SDL_QueryTexture(texture, nullptr, nullptr, &textureWidth, &textureHeight);
+    }
+    else
+    {
+        std::cerr << "Failed to get texture 'tileset'\n";
+    }
+
+    m_tileMap = new TileMap(32, 32, 0, 0, textureWidth, "tileset");
+    m_tileMap->LoadFromCSV("../CSV/map100x100_from_uploaded_tileset.csv");
 
     if (res && m_pSDLWindow && m_pRender)
     {
@@ -53,7 +69,9 @@ bool gameApp::Init()
 
 void gameApp::Shutdown()
 {
-    TextureManager::getInatnce().cleanImage();
+    TextureManager::getInstance().cleanImage();
+
+    delete m_tileMap;
 
     if (m_pRender)
     {
@@ -93,30 +111,41 @@ void gameApp::Run()
 
 void gameApp::Update(float deltaTime)
 {
-    const int32_t PixelsPerSecond = 200;
+    const float scrollSpeed = 4.0f;
 
-    auto amountOfMovement = (int32_t)(PixelsPerSecond * deltaTime);
+    const int32_t tilesInViewX = m_u32WindowWidth / 32;
+    const int32_t tilesInViewY = m_u32WindowHeight / 32;
+
+    auto amountOfMovement = (int32_t)(scrollSpeed * deltaTime);
 
     if (m_inputManager.IsKeyPressed(SDL_SCANCODE_W) || m_inputManager.IsKeyPressed(SDL_SCANCODE_UP))
     {
-        m_n32ImageYAxisLocation -= amountOfMovement;
+        m_tileMap->SetCameraY(m_tileMap->GetCameraY() - scrollSpeed);
     }
 
     if (m_inputManager.IsKeyPressed(SDL_SCANCODE_S) || m_inputManager.IsKeyPressed(SDL_SCANCODE_DOWN))
     {
-        m_n32ImageYAxisLocation += amountOfMovement;
+        m_tileMap->SetCameraY(m_tileMap->GetCameraY() + scrollSpeed);
     }
 
     if (m_inputManager.IsKeyPressed(SDL_SCANCODE_A) || m_inputManager.IsKeyPressed(SDL_SCANCODE_LEFT))
     {
-        m_n32ImageXAxisLocation -= amountOfMovement;
+        m_tileMap->SetCameraX(m_tileMap->GetCameraX() - scrollSpeed);
     }
 
     if (m_inputManager.IsKeyPressed(SDL_SCANCODE_D) || m_inputManager.IsKeyPressed(SDL_SCANCODE_RIGHT))
     {
-        m_n32ImageXAxisLocation += amountOfMovement;
+        m_tileMap->SetCameraX(m_tileMap->GetCameraX() + scrollSpeed);
     }
 
+    float maxScrollX = m_tileMap->GetNumOfCol() * 32 - m_u32WindowWidth;
+    float maxScrollY = m_tileMap->GetNumOfRows() * 32 - m_u32WindowHeight;
+
+    m_tileMap->SetCameraX(std::clamp(m_tileMap->GetCameraX(), 0.0f, maxScrollX));
+    m_tileMap->SetCameraY(std::clamp(m_tileMap->GetCameraY(), 0.0f, maxScrollY));
+
+//    m_tileMap->SetCameraX(std::clamp(m_tileMap->GetCameraX(), 0, m_tileMap->GetNumOfCol() - tilesInViewX));
+//    m_tileMap->SetCameraY(std::clamp(m_tileMap->GetCameraY(), 0, m_tileMap->GetNumOfRows() - tilesInViewY));
 }
 
 void gameApp::HandleEvents()
@@ -136,11 +165,9 @@ void gameApp::HandleEvents()
 
 void gameApp::Render()
 {
-    SDL_SetRenderDrawColor(m_pRender, 20, 20, 20, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(m_pRender);
 
-    TextureManager::getInatnce().drawImage("the one ring",
-                                           m_n32ImageXAxisLocation, m_n32ImageYAxisLocation,
-                                           256, 256, m_pRender);
+    m_tileMap->Render(m_pRender);
+
     SDL_RenderPresent(m_pRender);
 }
